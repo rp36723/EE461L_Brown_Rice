@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './App.css';
 
 function App() {
-  // Sample data for available hardware
   const [hardwareList, setHardwareList] = useState([
     { id: 1, name: 'Raspberry Pi 4', available: true },
     { id: 2, name: 'Arduino Uno', available: false },
@@ -10,44 +9,80 @@ function App() {
     { id: 4, name: 'Jetson Nano', available: true },
   ]);
 
-  // State to track the user's selected hardware for checkout
   const [selectedHardware, setSelectedHardware] = useState([]);
-
-  // State to track login status and user details
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [loginNameInput, setLoginNameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
 
-  // Handle selecting or deselecting hardware items
+  // Handle hardware selection
   const handleSelection = (id) => {
-    if (selectedHardware.includes(id)) {
-      setSelectedHardware(selectedHardware.filter(item => item !== id));
-    } else {
-      setSelectedHardware([...selectedHardware, id]);
-    }
+    setSelectedHardware(prevSelected =>
+      prevSelected.includes(id) ? prevSelected.filter(item => item !== id) : [...prevSelected, id]
+    );
   };
 
-  // Handle checkout submission
+  // Handle checkout
   const handleCheckout = () => {
     if (selectedHardware.length === 0) {
       alert("Please select at least one item to checkout.");
       return;
     }
-    
+
     const checkedOutItems = hardwareList.filter(item => selectedHardware.includes(item.id));
     alert(`You have checked out: ${checkedOutItems.map(item => item.name).join(', ')}`);
-    
-    // Reset the selected hardware list
     setSelectedHardware([]);
   };
 
-  // Handle login form submission
-  const handleLoginSubmit = (e) => {
+  // Handle login submission
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    setUsername(loginNameInput);
-    setIsLoggedIn(true);
-    setShowLoginForm(false);
+    try {
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: loginNameInput, password: passwordInput }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUsername(loginNameInput);
+        setIsLoggedIn(true);
+        setShowLoginForm(false);
+      } else {
+        alert(data.message || 'Invalid login credentials');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      alert('An error occurred during login.');
+    }
+  };
+
+  // Handle user registration
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:5000/add_user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: loginNameInput, password: passwordInput }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message || 'Registration successful');
+        setLoginNameInput('');
+        setPasswordInput('');
+      } else {
+        alert(data.message || 'Failed to register');
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      alert('An error occurred during registration.');
+    }
   };
 
   // Handle logout
@@ -55,6 +90,8 @@ function App() {
     setIsLoggedIn(false);
     setUsername('');
     setSelectedHardware([]);
+    setLoginNameInput('');
+    setPasswordInput('');
   };
 
   return (
@@ -70,7 +107,7 @@ function App() {
             </div>
           ) : (
             <button onClick={() => setShowLoginForm(!showLoginForm)} className="login-button">
-              {showLoginForm ? 'Close Login' : 'Login'}
+              {showLoginForm ? 'Close Login/Register' : 'Login/Register'}
             </button>
           )}
         </div>
@@ -79,14 +116,23 @@ function App() {
           <div className="login-form">
             <form onSubmit={handleLoginSubmit}>
               <label>
-                Username: 
+                Username:
                 <input
                   type="text"
                   value={loginNameInput}
                   onChange={(e) => setLoginNameInput(e.target.value)}
                 />
               </label>
+              <label>
+                Password:
+                <input
+                  type="password"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                />
+              </label>
               <button type="submit">Login</button>
+              <button type="button" onClick={handleRegisterSubmit}>Register</button>
             </form>
           </div>
         )}
@@ -114,7 +160,7 @@ function App() {
           </>
         )}
 
-        {!isLoggedIn && <p>Please log in to select and check out hardware.</p>}
+        {!isLoggedIn && <p>Please log in or register to select and check out hardware.</p>}
       </header>
     </div>
   );

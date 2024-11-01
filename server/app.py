@@ -15,6 +15,19 @@ import hardwareDatabase
 # Define the MongoDB connection string
 MONGODB_SERVER = os.getenv("MONGODB_URI")
 
+#TODO: before and after requests for the application
+def pre_request():
+    # Connect to MongoDB
+    client = MongoClient(MONGODB_SERVER)
+    #TODO: structure of the main database, will have multiple collections inside of it
+    #[users, projects, hardwareSets] all located within database[]
+    #easiest way to structure i hink
+
+def post_request():
+    # Close the MongoDB connection
+    #check how to close client requests
+    client.close()
+
 # Initialize a new Flask web application
 app = Flask(__name__)
 

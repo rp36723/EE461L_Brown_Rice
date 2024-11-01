@@ -15,32 +15,37 @@ Project = {
 '''
 
 # Function to query a project by its ID
-def queryProject(client, projectId):
+def queryProject(database, projectId):
     # Query and return a project from the database
-    pass
+    projects = database["projects"]
+    try:
+        return projects.find_one({"projectID": projectId})
+    except Exception as e:
+        print("Project Query FAILURE: " + str(e))
+        return None
 
 # Function to create a new project
-def createProject(client, projectName, projectId, description):
+def createProject(database, projectName, projectId, description):
     # Create a new project in the database
     pass
 
 # Function to add a user to a project
-def addUser(client, projectId, userId):
+def addUser(database, projectId, userId):
     # Add a user to the specified project
     pass
 
 # Function to update hardware usage in a project
-def updateUsage(client, projectId, hwSetName):
+def updateUsage(database, projectId, hwSetName):
     # Update the usage of a hardware set in the specified project
     pass
 
 # Function to check out hardware for a project
-def checkOutHW(client, projectId, hwSetName, qty, userId):
+def checkOutHW(database, projectId, hwSetName, qty, userId):
     # Check out hardware for the specified project and update availability
     pass
 
 # Function to check in hardware for a project
-def checkInHW(client, projectId, hwSetName, qty, userId):
+def checkInHW(database, projectId, hwSetName, qty, userId):
     # Check in hardware for the specified project and update availability
     pass
 

@@ -2,6 +2,10 @@
 from bson.objectid import ObjectId
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Import custom modules for database interactions
 import usersDatabase
@@ -9,7 +13,7 @@ import projectsDatabase
 import hardwareDatabase
 
 # Define the MongoDB connection string
-MONGODB_SERVER = ""
+MONGODB_SERVER = os.getenv("MONGODB_URI")
 
 # Initialize a new Flask web application
 app = Flask(__name__)

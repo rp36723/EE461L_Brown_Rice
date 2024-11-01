@@ -1,7 +1,8 @@
 # Import necessary libraries and modules
 from pymongo import MongoClient
 
-import projectsDB
+import projectsDatabase
+import cipher
 
 '''
 Structure of User entry:

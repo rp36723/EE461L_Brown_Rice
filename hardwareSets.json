@@ -1,0 +1,34 @@
+[
+    {
+        "hwName": "HWSet1",
+        "capacity": 100,
+        "availability": 100,
+        "description": "Basic Hardware Set 1",
+        "items": [
+            {
+                "name": "Raspberry Pi 4",
+                "quantity": 50
+            },
+            {
+                "name": "Arduino Uno",
+                "quantity": 50
+            }
+        ]
+    },
+    {
+        "hwName": "HWSet2",
+        "capacity": 100,
+        "availability": 100,
+        "description": "Advanced Hardware Set 2",
+        "items": [
+            {
+                "name": "ESP32 Microcontroller",
+                "quantity": 50
+            },
+            {
+                "name": "Jetson Nano",
+                "quantity": 50
+            }
+        ]
+    }
+]

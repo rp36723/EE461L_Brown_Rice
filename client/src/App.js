@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import ProjectDetails from './components/ProjectDetails';
+import LoginForm from './components/LoginForm';
 
 
 const API_BASE_URL = 'http://127.0.0.1:5001';
@@ -12,7 +13,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [userId, setUserId] = useState('');
-  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [showLoginForm, setShowLoginForm] = useState(true);
   const [loginNameInput, setLoginNameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -216,9 +217,6 @@ const handleJoinProject = async (e) => {
       }
   }
 };
-
-
-
   const handleCheckout = async () => {
     if (!selectedProject) {
       setError("Please select a project first");
@@ -275,91 +273,12 @@ const handleJoinProject = async (e) => {
     }
   };
 
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      console.log('Attempting login...');
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          username: loginNameInput,
-          password: passwordInput,
-          userId: loginNameInput
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Login response:', data);
-
-      if (data.success) {
-        setUsername(data.username);
-        setUserId(data.userId);
-        setIsLoggedIn(true);
-        setShowLoginForm(false);
-        setLoginNameInput('');
-        setPasswordInput('');
-        setError('');
-      } else {
-        setError(data.message || 'Login failed');
-      }
-    } catch (err) {
-      console.error('Error during login:', err);
-      setError('Error connecting to server: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+  const onLoginSuccess = ({ username, userId }) => {
+    setUsername(username);
+    setUserId(userId);
+    setIsLoggedIn(true);
   };
-
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      console.log('Attempting registration...');
-      const response = await fetch(`${API_BASE_URL}/add_user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          username: loginNameInput,
-          password: passwordInput,
-          userId: loginNameInput
-        }),
-      });
-
-      const data = await response.json();
-      console.log('Registration response:', data);
-
-      if (data.success) {
-        alert('Registration successful! Please login.');
-        setLoginNameInput('');
-        setPasswordInput('');
-        setError('');
-      } else {
-        setError(data.message);
-      }
-    } catch (err) {
-      console.error('Error during registration:', err);
-      setError('Error connecting to server: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername('');
@@ -394,48 +313,17 @@ const handleJoinProject = async (e) => {
               onClick={() => setShowLoginForm(!showLoginForm)} 
               className="login-button"
             >
-              {showLoginForm ? 'Close' : 'Login/Register'}
+              {showLoginForm ? 'About Us' : 'Login/Register'}
             </button>
           )}
         </div>
 
         {showLoginForm && !isLoggedIn && (
-          <div className="login-form">
-            <form onSubmit={handleLoginSubmit}>
-              <div className="form-group">
-                <label>Username:</label>
-                <input
-                  type="text"
-                  value={loginNameInput}
-                  onChange={(e) => setLoginNameInput(e.target.value)}
-                  disabled={loading}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Password:</label>
-                <input
-                  type="password"
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  disabled={loading}
-                  required
-                />
-              </div>
-              <div className="form-buttons">
-                <button type="submit" disabled={loading}>
-                  {loading ? 'Logging in...' : 'Login'}
-                </button>
-                <button 
-                  type="button" 
-                  onClick={handleRegisterSubmit} 
-                  disabled={loading}
-                >
-                  {loading ? 'Registering...' : 'Register'}
-                </button>
-              </div>
-            </form>
-          </div>
+          <LoginForm
+          onLoginSuccess={onLoginSuccess}
+          showLoginForm={showLoginForm}
+          setShowLoginForm={setShowLoginForm}
+        />
         )}
 
         {isLoggedIn && (
@@ -592,11 +480,54 @@ const handleJoinProject = async (e) => {
           </div>
         )}
 
-        {!isLoggedIn && (
+        {!isLoggedIn && showLoginForm &&(
           <div className="welcome-message">
             <p>Please log in or register to manage projects and hardware.</p>
           </div>
         )}
+        {/* Code + text for the about us section */}
+        {!showLoginForm && !isLoggedIn && (
+                <div className="additional-text">
+                <div className="about-us-container">
+                  <h2>About Us</h2>
+                  <div className="about-us-content" style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                    <div className="about-us-text" style={{ flex: '1 1 50%', minWidth: '300px' }}>
+                      <p>
+                        Welcome to Brown Rice, a hardware checkout management system. We are
+                        dedicated to providing easy and efficient tools for managing hardware
+                        projects, allowing users to create, join, and manage projects while
+                        tracking the use of hardware resources.
+                      </p>
+                      <p>
+                        Our platform ensures that your projects stay organized and that you
+                        have the resources you need right at your fingertips. With Brown Rice,
+                        you can focus more on innovation and less on the hassle of managing
+                        hardware logistics.
+                      </p>
+                      <p>
+                        Whether you are an engineering student working on a capstone project
+                        or a hardware enthusiast building the next big thing, Brown Rice is
+                        here to streamline your workflow and make hardware management
+                        effortless.
+                      </p>
+                      <p>
+                        We understand the challenges that come with managing hardware for
+                        large projects, including scheduling conflicts, hardware availability,
+                        and resource tracking. Our solution is built to simplify these tasks,
+                        making it easier for you to collaborate and succeed.
+                      </p>
+                      <p>
+                        Join us today and take your hardware projects to the next level. With
+                        Brown Rice, you can focus on your creativity while we handle the rest.
+                      </p>
+                    </div>
+                    <div className="about-us-images" style={{ flex: '1 1 40%', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                      <img src="/images/server-rack.jpg" alt="Server Rack" className="about-us-image" style={{ width: '80%', height: 'auto', borderRadius: '8px', alignSelf: 'center' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+      )}
       </header>
     </div>
   );

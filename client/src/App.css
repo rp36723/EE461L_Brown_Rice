@@ -367,3 +367,36 @@ button:not(:disabled):hover {
   position: relative;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.checkout-button, .checkin-button {
+  padding: 8px 16px;
+  min-width: 150px;
+}
+
+.checkin-button:not(:disabled) {
+  background-color: #4caf50;
+}
+
+.checkin-button:not(:disabled):hover {
+  background-color: #45a049;
+}
+
+.hardware-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}

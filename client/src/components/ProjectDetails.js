@@ -30,6 +30,13 @@ function ProjectDetails({ project }) {
                         <span>{quantity} units checked out</span>
                     </div>
                 ))}
+                <div className="hardware-status">
+                    <p className="hardware-note">
+                        {Object.values(project.hardware || {}).some(qty => qty > 0)
+                            ? "Use the hardware section below to check in equipment"
+                            : "No hardware currently checked out"}
+                    </p>
+                </div>
             </div>
         </div>
     );

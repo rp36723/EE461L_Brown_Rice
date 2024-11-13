@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import ProjectDetails from './components/ProjectDetails';
 
@@ -275,6 +275,62 @@ const handleJoinProject = async (e) => {
     }
   };
 
+  const handleCheckin = async () => {
+    if (!selectedProject) {
+      setError("Please select a project first");
+      return;
+    }
+    if (Object.keys(selectedHardware).length === 0) {
+      setError("Please select hardware to check in");
+      return;
+    }
+  
+    setLoading(true);
+    setError('');
+  
+    try {
+      console.log('Processing check-in...');
+      for (const [hwSetName, quantity] of Object.entries(selectedHardware)) {
+        if (quantity > 0) {
+          const response = await fetch(`${API_BASE_URL}/check_in`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              projectId: selectedProject,
+              hwSetName,
+              quantity,
+              userId
+            }),
+          });
+  
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+  
+          const data = await response.json();
+          console.log('Check-in response:', data);
+  
+          if (!data.success) {
+            throw new Error(data.message || 'Check-in failed');
+          }
+        }
+      }
+  
+      setSelectedHardware({});
+      await fetchHardwareSets();
+      await fetchUserProjects();
+      setSuccessMessage('Hardware checked in successfully!');
+    } catch (err) {
+      console.error('Error during check-in:', err);
+      setError('Check-in failed: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -540,48 +596,56 @@ const handleJoinProject = async (e) => {
                 project={projects.find(p => p.projectId === selectedProject)}
               />
             )}
-
             {selectedProject && (
-              <div className="hardware-section">
-                <h2>Available Hardware</h2>
-                <div className="hardware-list">
-                  {hardwareList.map(hw => (
-                    <div key={hw.hwName} className="hardware-item">
-                      <h3>{hw.hwName}</h3>
-                      <p>Available: {hw.availability} / {hw.capacity}</p>
-                      <div className="quantity-selector">
-                        <label>Quantity:</label>
-                        <input
-                          type="number"
-                          min="0"
-                          max={hw.availability}
-                          value={selectedHardware[hw.hwName] || 0}
-                          onChange={(e) => {
-                            const value = Math.min(
-                              Math.max(0, parseInt(e.target.value) || 0),
-                              hw.availability
-                            );
-                            setSelectedHardware(prev => ({
-                              ...prev,
-                              [hw.hwName]: value
-                            }));
-                          }}
-                        />
-                      </div>
+                <div className="hardware-section">
+                    <h2>Available Hardware</h2>
+                    <div className="hardware-list">
+                        {hardwareList.map(hw => (
+                            <div key={hw.hwName} className="hardware-item">
+                                <h3>{hw.hwName}</h3>
+                                <p>Available: {hw.availability} / {hw.capacity}</p>
+                                <div className="quantity-selector">
+                                    <label>Quantity:</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max={hw.availability}
+                                        value={selectedHardware[hw.hwName] || 0}
+                                        onChange={(e) => {
+                                            const value = Math.min(
+                                                Math.max(0, parseInt(e.target.value) || 0),
+                                                hw.availability
+                                            );
+                                            setSelectedHardware(prev => ({
+                                                ...prev,
+                                                [hw.hwName]: value
+                                            }));
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                  ))}
+                    
+                    <div className="hardware-buttons">
+                        <div className="button-container">
+                            <button 
+                                onClick={handleCheckout}
+                                disabled={loading || Object.keys(selectedHardware).length === 0}
+                                className="checkout-button"
+                            >
+                                {loading ? 'Processing...' : 'Checkout Hardware'}
+                            </button>
+                            <button 
+                                onClick={handleCheckin}
+                                disabled={loading || Object.keys(selectedHardware).length === 0}
+                                className="checkin-button"
+                            >
+                                {loading ? 'Processing...' : 'Check In Hardware'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                
-                <div className="action-buttons">
-                  <button 
-                    onClick={handleCheckout}
-                    disabled={loading || Object.keys(selectedHardware).length === 0}
-                    className="checkout-button"
-                  >
-                    {loading ? 'Processing...' : 'Checkout Hardware'}
-                  </button>
-                </div>
-              </div>
             )}
 
             {!selectedProject && (

@@ -26,7 +26,7 @@ function App() {
     description: ''
   });
   const [successMessage, setSuccessMessage] = useState('');
-
+  const [mode, setMode] = useState('checkout');
 
   // Fetch hardware sets on component mount
   useEffect(() => {
@@ -351,10 +351,6 @@ const handleJoinProject = async (e) => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const data = await response.json();
       console.log('Login response:', data);
 
@@ -599,36 +595,61 @@ const handleJoinProject = async (e) => {
             {selectedProject && (
                 <div className="hardware-section">
                     <h2>Available Hardware</h2>
+                    <div className="hardware-buttons">
+                        <button 
+                            onClick={() => setMode('checkout')}
+                            className={`mode-button ${mode === 'checkout' ? 'selected' : ''}`}
+                        >
+                            Checkout Mode
+                        </button>
+                        <button 
+                            onClick={() => setMode('checkin')}
+                            className={`mode-button ${mode === 'checkin' ? 'selected' : ''}`}
+                        >
+                            Check In Mode
+                        </button>
+                    </div>
                     <div className="hardware-list">
-                        {hardwareList.map(hw => (
-                            <div key={hw.hwName} className="hardware-item">
-                                <h3>{hw.hwName}</h3>
-                                <p>Available: {hw.availability} / {hw.capacity}</p>
-                                <div className="quantity-selector">
-                                    <label>Quantity:</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max={hw.availability}
-                                        value={selectedHardware[hw.hwName] || 0}
-                                        onChange={(e) => {
-                                            const value = Math.min(
-                                                Math.max(0, parseInt(e.target.value) || 0),
-                                                hw.availability
-                                            );
-                                            setSelectedHardware(prev => ({
-                                                ...prev,
-                                                [hw.hwName]: value
-                                            }));
-                                        }}
-                                    />
+                        {hardwareList.map(hw => {
+                            const currentProject = projects.find(p => p.projectId === selectedProject);
+                            const checkedOutQuantity = currentProject?.hardware[hw.hwName] || 0;
+                            
+                            return (
+                                <div key={hw.hwName} className="hardware-item">
+                                    <h3>{hw.hwName}</h3>
+                                    <p>Available: {hw.availability} / {hw.capacity}</p>
+                                    {mode === 'checkout' && (
+                                        <p>Maximum available to checkout: {hw.availability}</p>
+                                    )}
+                                    {mode === 'checkin' && (
+                                        <p>Currently checked out: {checkedOutQuantity}</p>
+                                    )}
+                                    <div className="quantity-selector">
+                                        <label>Quantity:</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max={mode === 'checkout' ? hw.availability : checkedOutQuantity}
+                                            value={selectedHardware[hw.hwName] || 0}
+                                            onChange={(e) => {
+                                                const value = Math.min(
+                                                    Math.max(0, parseInt(e.target.value) || 0),
+                                                    mode === 'checkout' ? hw.availability : checkedOutQuantity
+                                                );
+                                                setSelectedHardware(prev => ({
+                                                    ...prev,
+                                                    [hw.hwName]: value
+                                                }));
+                                            }}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                     
-                    <div className="hardware-buttons">
-                        <div className="button-container">
+                    <div className="action-buttons">
+                        {mode === 'checkout' ? (
                             <button 
                                 onClick={handleCheckout}
                                 disabled={loading || Object.keys(selectedHardware).length === 0}
@@ -636,6 +657,7 @@ const handleJoinProject = async (e) => {
                             >
                                 {loading ? 'Processing...' : 'Checkout Hardware'}
                             </button>
+                        ) : (
                             <button 
                                 onClick={handleCheckin}
                                 disabled={loading || Object.keys(selectedHardware).length === 0}
@@ -643,7 +665,7 @@ const handleJoinProject = async (e) => {
                             >
                                 {loading ? 'Processing...' : 'Check In Hardware'}
                             </button>
-                        </div>
+                        )}
                     </div>
                 </div>
             )}

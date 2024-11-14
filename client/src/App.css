@@ -189,9 +189,6 @@
   margin-left: 10px;
 }
 
-.action-buttons {
-  margin-top: 20px;
-}
 
 button {
   padding: 8px 16px;
@@ -306,11 +303,6 @@ button:not(:disabled):hover {
   margin: 0;
 }
 
-.project-actions {
-  display: flex;
-  gap: 10px;
-}
-
 .project-id {
   font-size: 0.8em;
   color: #888;
@@ -399,4 +391,26 @@ button:not(:disabled):hover {
   flex-direction: column;
   align-items: center;
   gap: 5px;
+}
+
+.mode-button {
+  padding: 8px 16px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #3a3f4a;
+  color: white;
+}
+
+.mode-button.selected {
+  background-color: #61dafb;
+  color: #282c34;
+}
+
+.hardware-buttons {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }

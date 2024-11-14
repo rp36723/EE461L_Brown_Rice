@@ -40,17 +40,15 @@ def login():
         password = data.get('password')
         userId = data.get('userId', username)
 
-        print(f"Login attempt for user: {username}")  # Debug logging
-
         if not all([username, password]):
-            print("Missing credentials")  # Debug logging
-            return jsonify({'success': False, 'message': 'Missing credentials'}), 400
+            return jsonify({
+                'success': False, 
+                'message': 'Please enter both username and password'
+            }), 400
 
         client, db = get_db()
         result = usersDatabase.login(db, username, userId, password)
         client.close()
-
-        print(f"Login result: {result}")  # Debug logging
 
         if result.startswith('SUCCESS'):
             return jsonify({
@@ -59,11 +57,27 @@ def login():
                 'username': username,
                 'userId': userId
             })
-        return jsonify({'success': False, 'message': result}), 401
+        elif "User not found" in result:
+            return jsonify({
+                'success': False,
+                'message': 'Username not found'
+            }), 401
+        elif "Incorrect password" in result:
+            return jsonify({
+                'success': False,
+                'message': 'Incorrect password'
+            }), 401
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Login failed'
+            }), 401
         
     except Exception as e:
-        print(f"Login error: {str(e)}")  # Debug logging
-        return jsonify({'success': False, 'message': str(e)}), 500
+        return jsonify({
+            'success': False, 
+            'message': 'Server error occurred. Please try again later.'
+        }), 500
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
